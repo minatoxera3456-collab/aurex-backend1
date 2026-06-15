@@ -5,22 +5,33 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Headers', 'Content-Type');
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   if (req.method === 'OPTIONS') return res.sendStatus(200);
   next();
 });
 
-app.post('/chat', async (req, res) => {
-  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer PUT_YOUR_KEY_HERE'
-    },
-    body: JSON.stringify(req.body)
-  });
-  const data = await response.json();
-  res.json(data);
+// Test route - open this URL in browser to check if backend is working
+app.get('/', (req, res) => {
+  res.json({ status: 'AUREX AI Backend is running!' });
 });
 
-app.listen(3000);
+app.post('/chat', async (req, res) => {
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer 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'
+      },
+      body: JSON.stringify(req.body)
+    });
+    const data = await response.json();
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ error: { message: err.message } });
+  }
+});
+
+app.listen(process.env.PORT || 3000, () => {
+  console.log('AUREX AI backend running!');
+});
